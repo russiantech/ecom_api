@@ -54,7 +54,7 @@ def generate_image(model):
 def seed_admin():
     role, created = get_or_create(db.session, Role,
                                   defaults={'description': 'for admin only'},
-                                  name='ROLE_ADMIN')
+                                  name='admin')
     '''
     # count admin
     admin_count = User.query.filter(User.roles.any(id=role.id)).count()
@@ -62,7 +62,7 @@ def seed_admin():
     # 4 ways of retrieving the admin users
     admin_users = User.query.filter(User.users_roles.any(role_id=role.id)).all()
     admin_users = User.query.filter(User.roles.any(id=role.id)).all()
-    admin_users = User.query.filter(User.roles.any(name='ROLE_ADMIN')).all()
+    admin_users = User.query.filter(User.roles.any(name='admin')).all()
     admin_users = User.query.join(User.roles).filter_by(name=role.name).all()
     '''
 
@@ -108,7 +108,7 @@ def seed_authors():
 def seed_users():
     role, created = get_or_create(db.session, Role,
                                   defaults={'description': 'for standard users'},
-                                  name='ROLE_USER')
+                                  name='user')
     db.session.commit()
     non_standard_user_ids = db.session.query(User.id) \
         .filter(~User.roles.any(id=role.id)).all()

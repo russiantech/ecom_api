@@ -53,7 +53,7 @@ def error_415(error):
     """ Unsupported Media Type error """
     db.session.rollback()
     if wants_json_response():
-        return api_error_response(415, message="Unsupported Media Type")
+        return api_error_response(415, message=f"Unsupported Media Type-|{error}")
     return render_template('errors/415.html', e=error), 415
 
 @errors_bp.app_errorhandler(429)
@@ -85,6 +85,17 @@ def error_db(error):
     return render_template('errors/500.html', e=error), 500
 
 
+
+@errors_bp.app_errorhandler(InterfaceError)
+@errors_bp.app_errorhandler(ProgrammingError)
+@errors_bp.app_errorhandler(IntegrityError)
+def handle_db_error(error):
+    """ Handle specific database-related errors. """
+    print("Caught InterfaceError or ProgrammingError or IntegrityError:", error)
+    db.session.rollback()
+    if wants_json_response():
+        return jsonify({'error': 'DB-related issue occurred'}), 500  # Internal Server Error
+    return render_template('errors/500.html', e=error), 500
 # Rest of my error handling logic
 
 

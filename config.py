@@ -38,7 +38,10 @@ class Config(object):
 
     """  """
     # JWT_COOKIE_CSRF_PROTECT : False
-    WTF_CSRF_ENABLED = False
+    # WTF_CSRF_ENABLED = False
+
+    # WTF_CSRF_CHECK_DEFAULT = False
+    
 
 # app = Flask(__name__)
 # app.config.from_object(Config)

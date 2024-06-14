@@ -25,4 +25,4 @@ bcrypt = Bcrypt()
 jwt = JWTManager(app)
 
 # //
-csrf = CSRFProtect(app)
+# csrf = CSRFProtect(app)

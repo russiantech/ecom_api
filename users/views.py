@@ -2,10 +2,11 @@ from flask import request, jsonify
 # from flask_jwt_extended import create_access_token, jwt_optional, get_jwt_identity
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 
+import traceback
 # from flask_wtf.csrf import csrf_exempt
+from errors.response import bad_request
 
-
-from ecommerce_api.factory import db, bcrypt, csrf
+from ecommerce_api.factory import db, bcrypt #, csrf
 from roles.models import Role
 from routes import blueprint
 from shared.serializers import get_success_response
@@ -21,30 +22,106 @@ def partially_protected():
     else:
         return jsonify(loggeed_in_as='anonymous user'), 200
 
+
 @blueprint.route('/users', methods=['POST'])
-# @csrf_exempt
 def create_user():
+
+    data = request.get_json()
+    if 'username' not in data or 'email' not in data or 'password' not in data:
+        return bad_request('must include username, email and password fields')
+    if db.session.scalar(sa.select(User).where(
+            User.username == data['username'])):
+        return bad_request('please use a different username')
+
+    if db.session.scalar(sa.select(User).where(
+            User.email == data['email'])):
+        return bad_request('please use a different email address')
+
+    if db.session.scalar(sa.select(User).where(
+            User.phone == data['phone'])):
+        return bad_request('please use a different phone number')
+
+    user = User()
+    user.from_dict(data, new_user=True)
+    db.session.add(user)
+    db.session.commit()
+    return user.to_dict(), 201, {'Location': url_for('api.get_user',
+                                                     id=user.id)}
+
+@blueprint.route('/users/<int:id>', methods=['PUT'])
+def update_user(id):
+    user = db.get_or_404(User, id)
+    data = request.get_json()
+    if 'username' in data and data['username'] != user.username and \
+        db.session.scalar(sa.select(User).where(
+            User.username == data['username'])):
+        return bad_request('please use a different username')
+    if 'email' in data and data['email'] != user.email and \
+        db.session.scalar(sa.select(User).where(
+            User.email == data['email'])):
+        return bad_request('please use a different email address')
+    user.from_dict(data, new_user=False)
+    db.session.commit()
+    return user.to_dict()
+
+
+
+
+
+
+
+
+@blueprint.route('/users', methods=['POST'])
+def create_user_0():
     try:
+        print(request.json)
+        data = request.get_json()
+        if 'username' not in data or 'email' not in data or 'password' not in data:
+            return bad_request('must include username, email and password fields')
+        if db.session.scalar(sa.select(User).where(
+                User.username == data['username'])):
+            return bad_request('please use a different username')
+
+        if db.session.scalar(sa.select(User).where(
+                User.email == data['email'])):
+            return bad_request('please use a different email address')
+
+        if db.session.scalar(sa.select(User).where(
+                User.phone == data['phone'])):
+            return bad_request('please use a different phone number')
+
         # Extract user registration data from the request
-        first_name = request.json.get('first_name', None)
-        last_name = request.json.get('last_name', None)
+        name = request.json.get('name', None)
         username = request.json.get('username', None)
-        password = request.json.get('password', None)
         email = request.json.get('email', None)
+        phone = request.json.get('phone', None)
+        password = request.json.get('password', None)
 
         # Retrieve the default role for a new user
-        role = db.session.query(Role).filter_by(name='ROLE_USER').first()
+        role = db.session.query(Role).filter_by(name='user').first()
+        
+        if role is None:
+            default_role = Role(name='user')
+            db.session.add(default_role)
+            db.session.commit()
 
         # Hash the password before storing
         hashed_password = bcrypt.generate_password_hash(password).decode('utf-8')
 
         # Create a new user instance and add to the database
-        db.session.add(User(first_name=first_name, last_name=last_name, username=username,
-                            password=hashed_password, roles=[role], email=email))
+        db.session.add(
+            User(
+            name=name, username=username, 
+            email=email, phone=phone,
+            password=hashed_password, 
+            roles=[role]
+            )
+            )
         db.session.commit()
 
         return jsonify({'message': 'User registered successfully'}), 201
     except Exception as e:
+        print(traceback.print_exc())
         db.session.rollback()  # Rollback the transaction to maintain data integrity
         return jsonify({'error': f'User registration failed. {e}'}), 400
 
@@ -53,7 +130,8 @@ def create_user():
 def login():
     
     if not request.is_json:
-        return jsonify({"msg": "Missing JSON in request"}), 400
+        # return jsonify({"msg": f"Missing JSON in request -< {type(request.data.get('username'))} "}), 400
+        return jsonify({"msg": "Missing JSON in request "}), 400
 
     username = request.json.get('username', None)
     password = request.json.get('password', None)

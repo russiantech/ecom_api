@@ -17,6 +17,7 @@ from users.models import User
 app.register_blueprint(blueprint, url_prefix='/api')
 app.register_blueprint(errors_bp, url_prefix='/api/errors')
 
+# app.config.setdefault("WTF_CSRF_CHECK_DEFAULT", False)
 
 # Like the old school Flask-Script for the shell, but using the new Flask CLI which is way better
 @app.shell_context_processor

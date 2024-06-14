@@ -14,7 +14,7 @@ class Comment(db.Model):
     rating = Column(Integer, nullable=True)
     user_id = Column(Integer, ForeignKey('users.id'), nullable=False)
     # user = relationship('User', backref=db.backref('comments'))
-    user = relationship('User', backref='comments')
+    user = relationship('User', back_populates='comments')
 
     product_id = Column(Integer, ForeignKey('products.id'), nullable=False)
 
