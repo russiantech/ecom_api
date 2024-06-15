@@ -18,3 +18,10 @@ def response(message):
     return error_response(400, message)
 
 
+
+from routes import blueprint as bp
+from werkzeug.exceptions import HTTPException
+
+@bp.errorhandler(HTTPException)
+def handle_exception(e):
+    return error_response(e.code)

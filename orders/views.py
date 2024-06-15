@@ -87,11 +87,13 @@ def create_order():
         return get_error_response('Error, make sure all products you want to order are still available')
 
     for index, product in enumerate(products):
-        order.order_items.append(OrderItem(price=product.price,
-                                           quantity=cart_items[index]['quantity'], product=product,
-                                           name=product.name,
-                                           slug=product.slug,
-                                           user_id=user_id))
+        order.order_items.append(
+            OrderItem(price=product.price,
+            quantity=cart_items[index]['quantity'], product=product,
+            name=product.name,
+            slug=product.slug,
+            user_id=user_id)
+            )
 
     db.session.add(order)
     db.session.commit()
