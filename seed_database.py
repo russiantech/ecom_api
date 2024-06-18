@@ -7,17 +7,17 @@ from sqlalchemy.orm import load_only
 from sqlalchemy.sql import ClauseElement
 from sqlalchemy.sql.expression import func
 
-from addresses.models import Address
+from apis.addresses.models import Address
 
-from categories.models import Category
-from comments.models import Comment
-from ecommerce_api.factory import db, bcrypt
-from file_uploads.models import ProductImage, TagImage, CategoryImage
-from orders.models import Order, OrderItem
-from products.models import Product
-from roles.models import Role, UserRole
-from tags.models import Tag
-from users.models import User
+from apis.categories.models import Category
+from apis.comments.models import Comment
+from apis.ecommerce_api.factory import db, bcrypt
+from apis.file_uploads.models import ProductImage, TagImage, CategoryImage
+from apis.orders.models import Order, OrderItem
+from apis.products.models import Product
+from apis.roles.models import Role, UserRole
+from apis.tags.models import Tag
+from apis.users.models import User
 
 fake = faker.Faker()
 tags = []

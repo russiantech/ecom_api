@@ -1,0 +1,187 @@
+	<!-- Header Star -->
+	<header class="site-header mo-left header style-1 header-transparent">		
+		<!-- Main Header -->
+		<div id="desktop_top_nav" class="sticky-header main-bar-wraper navbar-expand-lg">
+			<div class="main-bar clearfix">
+				<div class="container-fluid clearfix d-lg-flex d-block">
+					<!-- Website Logo -->
+					<div class="logo-header logo-dark me-md-5">
+						<a href="index.html"><img src="./static/images/logo.svg" alt="logo"></a>
+					</div>
+					<!-- Nav Toggle Button -->
+					<button class="navbar-toggler collapsed navicon justify-content-end" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+						<span></span>
+						<span></span>
+						<span></span>
+					</button>
+					<!-- Main Nav -->
+					<div class="header-nav w3menu navbar-collapse collapse justify-content-start" id="navbarNavDropdown">
+						<div class="logo-header logo-dark">
+							<a href="index.html"><img src="./static/images/logo.svg" alt=""></a>
+						</div>
+						<ul class="nav navbar-nav">
+							<li class="nav-item filte-link">
+								<a href="javascript:void(0);" class="nav-link filte-btn" data-bs-toggle="offcanvas" data-bs-target="#offcanvasLeft" aria-controls="offcanvasLeft">
+									<i class="iconly-Light-Category"></i> Categories
+								</a>
+							</li>
+
+							<li class="sub-menu-down">
+								<a href="javascript:void(0);">
+									<span>Chatme <div class="badge badge-sm rounded badge-animated">12</div></span>
+								</a>
+							</li>
+							<li class="sub-menu-down">
+								<a href="javascript:void(0);"><span>Post
+									<div class="badge badge-sm rounded badge-animated">New</div></span>
+									<i class="fas fa-telegram tabindex"></i></a>
+							</li>
+							<li class="sub-menu-down">
+								<a href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvasTop" aria-controls="offcanvasTop">
+									<span>Find<div class="badge badge-sm rounded badge-animated"> New</div></span>
+									<i class="fas fa-chevron-down tabindex"></i></a>
+							</li>
+						</ul>
+
+						<div class="dz-social-icon">
+							<ul>
+								<li><a class="fab fa-facebook-f" target="_blank" href="https://www.facebook.com/Techa . Russian Developers"></a></li>
+								<li><a class="fab fa-twitter" target="_blank" href="https://twitter.com/Techa . Russian Developerss"></a></li>
+								<li><a class="fab fa-linkedin-in" target="_blank" href="https://www.linkedin.com/showcase/3686700/admin/"></a></li>
+								<li><a class="fab fa-instagram" target="_blank" href="https://www.instagram.com/Techa . Russian Developers/"></a></li>
+							</ul>
+						</div>
+
+					</div>
+					<!-- EXTRA NAV -->
+					<div class="extra-nav">
+						<div class="extra-cell">						
+							<ul class="header-right">
+
+
+
+								<li class="sub-menu-down" data-bs-toggle="offcanvas" data-bs-target="#offcanvasLeft" 
+								aria-controls="offcanvasLeft">
+									<a href="javascript:void(0);">
+										<!-- Account -->
+									<i class="iconly-Curved-Activity"></i> 
+								</a>
+								</li>
+
+								<li class="nav-item wishlist-link">
+									<a class="nav-link" href="javascript:void(0);" data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+										<i class="iconly-Light-Heart2"></i>
+									</a>
+								</li>
+								<li class="nav-item cart-link">
+									<a href="javascript:void(0);" 
+									class="nav-link cart-btn"  data-bs-toggle="offcanvas" 
+									data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+										<i class="iconly-Broken-Buy"></i> 
+										<span class="badge badge-circle">5</span>
+									</a> 
+								</li>
+
+							</ul>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<!-- Main Header End -->
+
+		<!-- SearchBar -->
+        {% include 'incs/search.html' %}
+
+		<!-- Sidebar cart -->
+        {% include 'incs/quick_basket.html' %}
+
+		<!-- Sidebar finter -->
+        {% include 'incs/category.html' %}
+		
+	</header>
+
+	<!-- mobile header -->
+	<header id="mobile_top_nav" class="header header-fixed shadow">
+		<div class="header-content">
+			<div class="left-content">
+				<a href="javascript:void(0);" class="menu-toggler bg-white-- pe-2 rounded-xl">
+					<div class="media">
+						<div class="media-35 m-r10">
+							<img class="rounded-xxl" height="100" width="auto" src="./static/images/logo.svg" alt="">
+						</div>
+						<!-- <h6 class="mb-0 font-13">Salesnet</h6> -->
+					</div>
+				</a>
+			</div>
+
+			<div class="mid-content"></div>
+
+			<div class="right-content d-flex align-items-center gap-3">
+				
+				<a href="javascript:void(0);" class="nav-link"  data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+					<i class="iconly-Curved-Send"></i>
+					<span class="badge badge-sm rounded badge-animated badge_down">5</span>
+				</a> 
+				
+				<a href="javascript:void(0);" class="nav-link cart-btn"  data-bs-toggle="offcanvas" 
+				data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+				<i class="iconly-Curved-Search"></i>
+					<span class="badge  badge-sm rounded badge-animated badge_down">5</span>
+				</a> 
+
+				<a href="javascript:void(0);" class="nav-link"  data-bs-toggle="offcanvas" 
+				data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+				<i class="iconly-Curved-User"></i>
+					<span class="badge  badge-sm rounded badge-animated badge_down">5</span>
+				</a> 
+
+				<!-- <a href="javascript:void(0);" class="nav-link cart-btn" 
+				 data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+					<a href="profile.html" class="nav-link">
+						
+						<!-- <i class="fi fi-rr-user"></i> --
+						<i class="iconly-Bold-Search"></i>
+						<i class="iconly-Bold-Plus"></i>
+						<i class="iconly-Bold-Play"></i>
+						<i class="iconly-Bold-People"></i>
+						<i class="iconly-Bold-Paper"></i>
+						<i class="iconly-Bold-PaperPlus"></i>
+						<i class="iconly-Bold-PaperUpload"></i>
+						<i class="iconly-Curved-User"></i> 
+					</a>
+					<span class="badge badge-sm rounded badge-animated">12</span> 
+				</a>  -->
+
+			</div>
+		</div>
+	</header>
+
+	<!-- mobile footer -->
+	<div id="mobile_bottom_nav" class="menubar-area footer-fixed">
+		<div class="toolbar-inner menubar-nav">
+			<a href="./" class="nav-link active0">
+				<i class="iconly-Light-Category"></i>
+				<span class="cart-badge badge_down">9</span>
+			</a>
+			<a href="./chatme" class="nav-link">
+				<i class="iconly-Light-Chat"></i>
+				<span class="cart-badge badge-animated">1499</span>
+			</a>
+			<a href="./welcome" class="nav-link">
+				<i class="iconly-Light-Home"></i>
+			</a>
+			<a href="./saved" class="nav-link">
+				<i class="iconly-Light-Heart2"></i>
+				<span class="cart-badge badge-animated">5</span>
+			</a>
+
+			<a href="javascript:void(0);" class="nav-link cart-btn"  data-bs-toggle="offcanvas" data-bs-target="#offcanvasRight" aria-controls="offcanvasRight">
+			<!-- <a href="./account" class="nav-link"> -->
+				<i class="iconly-Broken-Buy"></i> 
+				<span class="cart-badge badge-animated">9</span>
+			</a>
+			
+		</div>
+	</div>
+	<!--  -->

@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<title>{% block title %} Salesnet . {% endblock title %}</title> 
+	{% include 'incs/metas.html' %} 
+	{% block page_css %} {% endblock page_css %}
+</head>	
+
+<body id="bg">
+<div class="page-wraper">
+	
+	<div id="loading-area" class="preloader-wrapper-4">
+		<img src="./static/images/loading.gif" alt="">
+	</div>
+
+	{% include 'incs/header.html' %}
+
+	{% block content %}  {% endblock content %}
+	
+	<!-- Footer -->
+	{% include 'incs/footer.html' %}
+
+	<!--scroll-top-->
+	<button class="scroltop" type="button"><i class="fas fa-arrow-up"></i></button>
+
+	<!-- Quick Modal Start -->
+	{% include 'incs/quickv.html' %}
+	
+</div>
+
+{% include 'incs/bottom_js.html' %}
+    
+{% block page_js %}  {% endblock page_js %}
+</body>
+
+</html>

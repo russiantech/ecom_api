@@ -1,0 +1,460 @@
+from datetime import datetime
+
+from flask_jwt_extended import current_user
+from slugify import slugify
+from sqlalchemy import event
+from sqlalchemy.orm import relationship
+
+from apis.ecommerce_api.factory import db
+from apis.categories.models import products_categories
+from apis.tags.models import products_tags
+
+
+class Product(db.Model):
+    __tablename__ = 'products'
+        __tablename__ = 'product'
+    __searchable__BAK = [
+        'category_id','name','price', 'desc', 'images', 'currency','location','contact','page_id','user_id', 'pay_interval', 'condition',
+        'negotiable', 'phone', 'about','required_skills','meet_up', 'ip', 'availability', 'company', 'sku', 'stock', 'discount','color', 'size','property_size', 
+        'model','year','make','job_level','min_exp','min_qualify','pay_range','responsibilities','job_setup', 'required_skills',
+        'bedrooms', 'bathrooms','property_for', 'amenities', 'product_brand','address', 'date_available', 'product_type',
+        'fuel_type']
+
+    __searchable__ = [
+        'category_id','name','price', 'desc', 'currency','location','contact','page_id','user_id', 'pay_interval', 'condition',
+        'negotiable', 'phone', 'about','required_skills','meet_up', 'ip', 'availability', 'company', 'sku', 'stock', 'discount','color', 'size','property_size', 
+        'model','year','make','job_level','min_exp','min_qualify','pay_range','responsibilities','job_setup', 'required_skills',
+        'bedrooms', 'bathrooms','property_for', 'amenities', 'product_brand','address', 'date_available', 'product_type',
+        'fuel_type']
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(255), nullable=False)
+    slug = db.Column(db.String(140), index=True, unique=True)
+    description = db.Column(db.Text, nullable=False)
+
+    price = db.Column(db.Integer, nullable=False)
+    stock = db.Column(db.Integer, nullable=False)
+
+    # 
+    page_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    images = db.Column(db.JSON, nullable=False)
+    currency = db.Column(db.String(50))
+    price = db.Column(db.Float, nullable=False)
+    pay_interval = db.Column(db.String(50)) #like monthly for product like property, like maybe commission-based for product like jobs/services
+    desc = db.Column(db.Text)
+    negotiable = db.Column(db.Boolean(), default=False)
+    listing_type = db.Column(db.String(50), nullable=False, default='physical') 
+    listing_brand = db.Column(db.String(50))  
+    condition =  db.Column(db.String(50)) #(New, Used like new, Used good, Used fair)
+    ip = db.Column(db.String(50))
+    meet_up = db.Column(db.JSON)
+    availability  = db.Column(db.String(50)) #instock,single item,avaialable,//Will be updated to 'sold' if initially a single item and it's sold,
+    company = db.Column(db.String(50))
+
+    #Product.
+    sku = db.Column(db.String(1000), unique=True) #(stock keeping unit)
+    stock_qty = db.Column(db.Integer, default='1')
+    discount = db.Column(db.Integer)
+    
+    color = db.Column(db.JSON, default=None, nullable=True) #color:- {'red','wine', 'etc'},
+    size = db.Column(db.JSON, default=None, nullable=True) #size:- {'s','m', 'l', 'xl', 'xxl'},
+
+    # Property/Real Estate
+    property_size  = db.Column(db.Integer)      
+    bedrooms = db.Column(db.Integer)      
+    bathrooms = db.Column(db.Integer)     
+    property_for = db.Column(db.String(50)) #[for (rent/for sale)]
+    amenities = db.Column(db.JSON)
+    date_available = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    
+    #Vehicle(s)-product
+    fuel_type = db.Column(db.String(50)) #[diesel, electric,gasoline,flex,hybrid,petrol,plug-in hybrid, other]
+    make = db.Column(db.String(50))      
+    model = db.Column(db.String(50))     
+    year = db.Column(db.String(50))  
+
+    #Jobs-product
+    job_level = db.Column(db.String(50)) # For job listings[senior, middle, leadership, junior]
+    min_experience = db.Column(db.String(50), default='1')    #minimum experience
+    min_qualify  = db.Column(db.String(50))       
+    pay_range  = db.Column(db.Integer, default=None)       
+    responsibilities  = db.Column(db.String(50))       
+    required_skills   = db.Column(db.String(50))       
+    job_setup   = db.Column(db.String(50))  #remote,office,hybrid 
+
+    location = db.Column(db.JSON, nullable=True) #location:- {'region':'USA', 'city':'london', 'street':'beach-house, 27 california', 'zipcode':'1099990'},
+    contact = db.Column(db.JSON, nullable=True) #contact:- see location column for sample using(name:name,emal:email,phone:phone,etc)
+    
+    page_id = db.Column(db.Integer, db.ForeignKey('pages.id'))
+    pages = db.relationship('Pages', back_populates='product')
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', back_populates='product')
+    
+    saved = db.relationship('Saved', secondary=saved_product, back_populates='product', lazy='dynamic')
+    category = db.relationship('Category', secondary=category_product, lazy='dynamic', back_populates='product')
+
+    is_active = db.Column(db.Boolean(), default=True) #[sold, active,]
+    deleted = db.Column(db.Boolean(), default=False)
+    created = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    updated = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    # 
+    created_at = db.Column(db.DateTime(), default=datetime.utcnow, index=True, nullable=False)
+    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    publish_on = db.Column(db.DateTime, index=True, default=datetime.utcnow)
+
+    tags = relationship('Tag', secondary=products_tags, back_populates='products')
+    # tags = relationship('Tag', secondary=products_tags, backref='products')
+    categories = relationship('Category', secondary=products_categories, backref='products')
+
+    comments = relationship('Comment', backref='product', lazy='dynamic')
+
+    def __repr__(self):
+        return '<Product %r>' % self.name
+
+    def __str__(self):
+        return '<Product {}>'.format(self.name)
+
+    def get_summary(self):
+        return {
+            'id': self.id,
+            'name': self.name,
+            'price': self.price,
+            'stock': self.stock,
+            'slug': self.slug,
+            'comments_count': self.comments.count(),
+            'tags': [{'id': t.id, 'name': t.name} for t in self.tags],
+            'categories': [{'id': c.id, 'name': c.name} for c in self.categories],
+            'image_urls': [i.file_path for i in self.images]
+        }
+
+    def exists(Product):
+        return Product.query.filter(Product.id==Product.first() is not None
+   
+    # Example: Unique constraint on the 'title' and 'cate_id' columns
+    __table_args__ = (
+        db.UniqueConstraint('name', 'category_id', 'page_id', name='uq_name_category_page'),
+    )
+
+    def parse_json(self, json_str):
+        try:
+            if json_str:
+                return json.loads(str(json_str))
+        except json.JSONDecodeError:
+            # Handle the case where json_str is empty or invalid JSON
+            return None
+
+    def parse_str(self, str):
+        try:
+            if str is None or str == "":
+                return None
+            return str
+        except AttributeError:
+            # Handle the case where json_str is empty or invalid JSON
+            return None
+    
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'name': self.name,
+            'price': self.price,
+            'desc': self.desc,
+            'stock': self.stock,
+            'slug': self.slug,
+            'comments_count': self.comments.count(),
+            'tags': [{'id': t.id, 'name': t.name} for t in self.tags],
+            'category_id': self.category_id,
+            'categories': [{'id': c.id, 'name': c.name} for c in self.categories],
+            'image_urls': [i.file_path for i in self.images]
+            'condition': self.condition,
+            'currency': self.currency,
+            'contact': self.parse_json(self.contact)  if self.contact else None,
+            'location': self.parse_json(self.location) if self.location else None,
+            'images': self.parse_json(self.images) if self.images else None,
+            'amenities': self.parse_json(self.amenities)if self.amenities else None,
+            'size': self.parse_json(self.size) if self.size else None,
+            'color': self.parse_json(self.color) if self.color else None,
+            'meet_up': self.meet_up,
+            'pay_interval': self.pay_interval,
+            'negotiable': self.negotiable,
+            'availability': self.availability,
+            'product_type': self.product_type,
+            'product_brand': self.product_brand,
+            'sku': self.sku,
+            'company': self.company,
+            'discount': self.discount,
+
+            'property_size': self.property_size,
+            'bedrooms': self.bedrooms,
+            'bathrooms': self.bathrooms,
+            'property_for': self.parse_str(self.property_for),
+            'date_available': self.date_available,
+
+            'fuel_type': self.fuel_type,
+            'make': self.make,
+            'model': self.model,
+            'year': self.year,
+
+            'job_level': self.job_level,
+            'min_experience': self.min_exp,
+            'min_qualify': self.min_qualify,
+            'pay_range': self.pay_range,
+            'responsibilities': self.responsibilities,
+            'required_skills': self.parse_str(self.required_skills),
+            'job_setup': self.job_setup,
+
+            'created_at': self.created_at,
+            'updated_at': self.updated_at,
+            'publish_on': self.publish_on1,
+
+            'page': {
+                'id':  self.pages.id if self.pages else None,
+                #'title':  self.parse_str(self.pages.title),
+                'name':  self.parse_str(self.pages.name) if self.pages else None,
+                'desc': self.parse_str(self.pages.desc) if self.pages else None,
+                'bank': self.parse_json(self.pages.bank) if self.pages else None,
+                'contact': self.parse_json(self.pages.contact)  if self.pages else None,
+                'location': self.parse_json(self.location) if self.pages else None,
+                'images': self.parse_json(self.pages.images) if self.pages else None,
+                'socials': self.parse_json(self.pages.socials) if self.pages else None,
+                'reviews': (self.pages.reviews) if self.pages else None,
+                'page_user_id': (self.pages.user_id) if self.pages else None,
+            },
+
+            'user': {
+                'page_url':  None,
+                'username': (self.user.name or self.user.username) if self.user else None,
+                'location': (self.user.location or self.page.location) if self.user else None,
+                'user_name': (self.user.name or self.user.username) if self.user else None,
+            },
+            
+            '_links': {
+                'user_profile': url_for('user_api.get_user', id=self.user_id) if self.user_id else None,
+                'self': url_for('listing_api.get_listing', id=self.id),
+            }
+
+        }
+
+        return data
+    
+    def from_dict(self, data, new_listing=False):
+        for field in self.__searchable__:
+            if field in data:
+                setattr(self, field, data[field])
+        if 'contact' in data:
+            self.contact(json.dumps(data['contact']))
+        if 'location' in data:
+            self.location(json.dumps(data['location']))
+        if 'images' in data:
+            self.images(json.dumps(data['images']))
+        if 'color' in data:
+            self.color(json.dumps(data['color']))
+        if 'size' in data:
+            self.size(json.dumps(data['size']))
+        if 'amenities' in data:
+            self.amenities(json.dumps(data['amenities']))
+
+
+@event.listens_for(Product.name, 'set')
+def receive_set(target, value, oldvalue, initiator):
+    target.slug = slugify(unicode(value))
+
+
+
+class Product.db.Model, SearchableMixin, PaginatedAPIMixin):
+    __tablename__ = 'product'
+    __searchable__ = [
+        'category_id','title','price', 'desc', 'images', 'currency','location','contact','page_id','user_id', 'pay_interval', 'condition',
+        'negotiable', 'phone', 'about','required_skills','meet_up', 'ip', 'availability', 'company', 'sku', 'stock_qty', 'discount','color', 'size','property_size', 
+        'model','year','make','job_level','min_exp','min_qualify','pay_range','responsibilities','job_setup', 'required_skills',
+        'bedrooms', 'bathrooms','property_for', 'amenities', 'amenities', 'listing_brand','address', 'date_available', 'listing_type',
+        'fuel_type']
+
+    id = db.Column(db.Integer, primary_key=True)
+    page_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+    category_id = db.Column(db.Integer, db.ForeignKey('category.id'), nullable=False)
+    title = db.Column(db.String(80), nullable=False)
+    images = db.Column(db.JSON, nullable=False)
+    currency = db.Column(db.String(50))
+    price = db.Column(db.Float, nullable=False)
+    pay_interval = db.Column(db.String(50)) #like monthly for product like property, like maybe commission-based for product like jobs/services
+    desc = db.Column(db.Text)
+    negotiable = db.Column(db.Boolean(), default=False)
+    listing_type = db.Column(db.String(50), nullable=False, default='physical') 
+    listing_brand = db.Column(db.String(50))  
+    condition =  db.Column(db.String(50)) #(New, Used like new, Used good, Used fair)
+    ip = db.Column(db.String(50))
+    meet_up = db.Column(db.JSON)
+    availability  = db.Column(db.String(50)) #instock,single item,avaialable,//Will be updated to 'sold' if initially a single item and it's sold,
+    company = db.Column(db.String(50))
+
+    #Product.
+    sku = db.Column(db.String(1000), unique=True) #(stock keeping unit)
+    stock_qty = db.Column(db.Integer, default='1')
+    discount = db.Column(db.Integer)
+    
+    color = db.Column(db.JSON, default=None, nullable=True) #color:- {'red','wine', 'etc'},
+    size = db.Column(db.JSON, default=None, nullable=True) #size:- {'s','m', 'l', 'xl', 'xxl'},
+
+    # Property/Real Estate
+    property_size  = db.Column(db.Integer)      
+    bedrooms = db.Column(db.Integer)      
+    bathrooms = db.Column(db.Integer)     
+    property_for = db.Column(db.String(50)) #[for (rent/for sale)]
+    amenities = db.Column(db.JSON)
+    date_available = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    
+    #Vehicle(s)-product
+    fuel_type = db.Column(db.String(50)) #[diesel, electric,gasoline,flex,hybrid,petrol,plug-in hybrid, other]
+    make = db.Column(db.String(50))      
+    model = db.Column(db.String(50))     
+    year = db.Column(db.String(50))  
+
+    #Jobs-product
+    job_level = db.Column(db.String(50)) # For job listings[senior, middle, leadership, junior]
+    min_experience = db.Column(db.String(50), default='1')    #minimum experience
+    min_qualify  = db.Column(db.String(50))       
+    pay_range  = db.Column(db.Integer, default=None)       
+    responsibilities  = db.Column(db.String(50))       
+    required_skills   = db.Column(db.String(50))       
+    job_setup   = db.Column(db.String(50))  #remote,office,hybrid 
+
+    location = db.Column(db.JSON, nullable=True) #location:- {'region':'USA', 'city':'london', 'street':'beach-house, 27 california', 'zipcode':'1099990'},
+    contact = db.Column(db.JSON, nullable=True) #contact:- see location column for sample using(name:name,emal:email,phone:phone,etc)
+    
+    page_id = db.Column(db.Integer, db.ForeignKey('pages.id'))
+    pages = db.relationship('Pages', back_populates='product')
+
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user = db.relationship('User', back_populates='product')
+    
+    saved = db.relationship('Saved', secondary=wishlist_listing, back_populates='product', lazy='dynamic')
+    category = db.relationship('Category', secondary=category_listing, lazy='dynamic', back_populates='product')
+
+    is_active = db.Column(db.Boolean(), default=True) #[sold, active,]
+    deleted = db.Column(db.Boolean(), default=False)
+    created = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+    updated = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
+
+    def exists(Product):
+        return Product.query.filter(Product.id==Product..first()) is not None
+   
+    # Example: Unique constraint on the 'title' and 'cate_id' columns
+    __table_args__ = (
+        db.UniqueConstraint('title', 'cate_id', 'page_id', name='uq_title_cate_page'),
+    )
+
+    def parse_json(self, json_str):
+        try:
+            if json_str:
+                return json.loads(str(json_str))
+        except json.JSONDecodeError:
+            # Handle the case where json_str is empty or invalid JSON
+            return None
+
+    def parse_str(self, str):
+        try:
+            if str is None or str == "":
+                return None
+            return str
+        except AttributeError:
+            # Handle the case where json_str is empty or invalid JSON
+            return None
+    
+    def to_dict(self):
+        data = {
+            'id': self.id,
+            'ip': self.ip,
+            'title': self.title,
+            'price': self.price,
+            'desc': self.desc,
+            'cate_id': self.cate_id,
+            'condition': self.condition,
+            'currency': self.currency,
+            'contact': self.parse_json(self.contact)  if self.contact else None,
+            'location': self.parse_json(self.location) if self.location else None,
+            'images': self.parse_json(self.images) if self.images else None,
+            'amenities': self.parse_json(self.amenities)if self.amenities else None,
+            'size': self.parse_json(self.size) if self.size else None,
+            'color': self.parse_json(self.color) if self.color else None,
+            'meet_up': self.meet_up,
+            'pay_interval': self.pay_interval,
+            'negotiable': self.negotiable,
+            'availability': self.availability,
+            'listing_type': self.listing_type,
+            'listing_brand': self.listing_brand,
+            'sku': self.sku,
+            'stock_qty': self.stock_qty,
+            'company': self.company,
+            'discount': self.discount,
+
+            'property_size': self.property_size,
+            'bedrooms': self.bedrooms,
+            'bathrooms': self.bathrooms,
+            'property_for': self.parse_str(self.property_for),
+            'date_available': self.date_available,
+
+            'fuel_type': self.fuel_type,
+            'make': self.make,
+            'model': self.model,
+            'year': self.year,
+
+            'job_level': self.job_level,
+            'min_experience': self.min_exp,
+            'min_qualify': self.min_qualify,
+            'pay_range': self.pay_range,
+            'responsibilities': self.responsibilities,
+            'required_skills': self.parse_str(self.required_skills),
+            'job_setup': self.job_setup,
+            'listing_profile': url_for('listing_api.get_listing', id=self.id),
+
+            'page': {
+                'id':  self.pages.id if self.pages else None,
+                #'title':  self.parse_str(self.pages.title),
+                'title':  self.parse_str(self.pages.title) if self.pages else None,
+                'desc': self.parse_str(self.pages.desc) if self.pages else None,
+                'bank': self.parse_json(self.pages.bank) if self.pages else None,
+                'contact': self.parse_json(self.pages.contact)  if self.pages else None,
+                'location': self.parse_json(self.location) if self.pages else None,
+                'images': self.parse_json(self.pages.images) if self.pages else None,
+                'socials': self.parse_json(self.pages.socials) if self.pages else None,
+                'reviews': (self.pages.reviews) if self.pages else None,
+                'page_user_id': (self.pages.user_id) if self.pages else None,
+                'page_user': (self.pages.user.id) if self.pages else None,
+            },
+
+            'user': {
+                'page_url':  None,
+                'user_name': (self.user.name or self.user.username) if self.user else None,
+                'location': (self.user.location or self.page.location) if self.user else None,
+                'user_name': (self.user.name or self.user.username) if self.user else None,
+            },
+            
+            '_links': {
+                'user_profile': url_for('user_api.get_user', id=self.user_id) if self.user_id else None,
+                'self': url_for('listing_api.get_listing', id=self.id),
+                'followers': url_for('listing_api.get_followers', id=self.id),
+                'followed': url_for('listing_api.get_followed', id=self.id)
+            }
+
+        }
+
+        return data
+    
+    def from_dict(self, data, new_listing=False):
+        for field in self.__searchable__:
+            if field in data:
+                setattr(self, field, data[field])
+        if 'contact' in data:
+            self.contact(json.dumps(data['contact']))
+        if 'location' in data:
+            self.location(json.dumps(data['location']))
+        if 'images' in data:
+            self.images(json.dumps(data['images']))
+        if 'color' in data:
+            self.color(json.dumps(data['color']))
+        if 'size' in data:
+            self.size(json.dumps(data['size']))
+        if 'amenities' in data:
+            self.amenities(json.dumps(data['amenities']))

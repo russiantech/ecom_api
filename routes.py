@@ -1,6 +1,8 @@
 from flask import Blueprint
-# from ecommerce_api.factory import csrf
+# from apis.ecommerce_api.factory import csrf
 
-blueprint = Blueprint('main', __name__)
+api_bp = Blueprint('api', __name__)
 
-# csrf.exempt(blueprint) # disable csrf-protection to fix error-400(BAD REQUEST)
+# static_bp = Blueprint('static_bp', __name__)
+
+# csrf.exempt(api_bp) # disable csrf-protection to fix error-400(BAD REQUEST)

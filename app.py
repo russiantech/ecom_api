@@ -1,20 +1,22 @@
-from addresses.models import Address
-from categories.models import Category
-from comments.models import Comment
-from ecommerce_api.factory import app, db
-from file_uploads.models import FileUpload, ProductImage, TagImage, CategoryImage
-from orders.models import Order
-from products.models import Product
-from routes import blueprint
-from errors.handlers import errors_bp
-from tags.models import Tag
-from users.models import User
+from apis.addresses.models import Address
+from apis.categories.models import Category
+from apis.comments.models import Comment
+from apis.ecommerce_api.factory import app, db
+from apis.file_uploads.models import FileUpload, ProductImage, TagImage, CategoryImage
+from apis.orders.models import Order
+from apis.products.models import Product
+from routes import api_bp
+from apis.errors.handlers import errors_bp
+from apis.tags.models import Tag
+from apis.users.models import User
+
+from views.products import static_bp
 
 # Extensions, it is not how a well organized project initializes the extensions but hey, it
 # is simple and readable anyways.
 
-
-app.register_blueprint(blueprint, url_prefix='/api')
+app.register_blueprint(api_bp, url_prefix='/api') #api-backend
+app.register_blueprint(static_bp)  #api-frontend-static-bp
 # app.register_blueprint(errors_bp, url_prefix='/api/errors') //kukuma use/re-use a single bp
 # app.config.setdefault("WTF_CSRF_CHECK_DEFAULT", False)
 
