@@ -1,10 +1,12 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+import sqlalchemy.orm as so
 
 from apis.ecommerce_api.factory import db, bcrypt
 from apis.roles.models import users_roles
 # from apis.products.models import products_users
 from apis.pages.models import users_pages
+from apis.chat.models import Chat
 
 products_users = \
     db.Table(
@@ -35,15 +37,19 @@ class User(db.Model):
     # roles = db.relationship('Role', secondary=users_roles, backref='users')
 
     # Relationships with explicit primaryjoin conditions
-    sent_messages = db.relationship('Chat', foreign_keys='Chat.fromuser_id', primaryjoin='Chat.fromuser_id == User.id', 
+    """ sent_messages = db.relationship('Chat', foreign_keys='Chat.fromuser_id', primaryjoin='Chat.fromuser_id == User.id', 
                                     backref='from_user', lazy='dynamic')
     received_messages = db.relationship('Chat', foreign_keys='Chat.touser_id', primaryjoin='Chat.touser_id == User.id', 
-                                        backref='to_user', lazy='dynamic')
+                                        backref='to_user', lazy='dynamic') """
 
-    # pages = db.relationship('Pages', back_populates='user') #instead of vendors we have pages(sales page(s))
-    basket_items = db.relationship('Basket_Item', back_populates='user')
-    
-    pages = db.relationship('Pages', secondary=users_pages, lazy='dynamic', back_populates='users')
+    """ sent_messages: so.WriteOnlyMapped['Chat'] = so.relationship( foreign_keys='Chat.fromuser_id', back_populates='from_user')
+    received_messages: so.WriteOnlyMapped['Chat'] = so.relationship(foreign_keys='Chat.touser_id', back_populates='to_user') """
+
+    sent_messages = db.relationship('Chat', foreign_keys='Chat.fromuser_id', back_populates='from_user', lazy='dynamic')
+    received_messages = db.relationship('Chat', foreign_keys='Chat.touser_id', back_populates='to_user', lazy='dynamic')
+
+    baskets = db.relationship('Basket', back_populates='user')
+    pages = db.relationship('Page', secondary=users_pages, lazy='dynamic', back_populates='users')
     products = db.relationship('Product', secondary=products_users, lazy='dynamic', back_populates='users')
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

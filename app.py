@@ -9,7 +9,7 @@ from routes import api_bp
 from apis.errors.handlers import errors_bp
 from apis.tags.models import Tag
 from apis.users.models import User
-from apis.chat.models import Chat
+from apis.baskets.models import Basket
 
 from views.products import static_bp
 
@@ -27,7 +27,7 @@ def make_shell_context():
     return dict(
         app=app, db=db, User=User, address=Address, order=Order, product=Product,
         tag=Tag, category=Category, comment=Comment, file_upload=FileUpload, tag_image=TagImage,
-        category_image=CategoryImage, product_image=ProductImage, chat=Chat,
+        category_image=CategoryImage, product_image=ProductImage, chat=Chat, basket=Basket,
         )
 
 

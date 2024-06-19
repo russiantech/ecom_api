@@ -11,9 +11,6 @@ class Chat(db.Model, PaginatedAPIMixin):
 
     id = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
 
-    fromuser_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    touser_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
     text = db.Column(db.String(140))
     media = db.Column(db.String(140))
     sticker = db.Column(db.String(140))
@@ -28,6 +25,15 @@ class Chat(db.Model, PaginatedAPIMixin):
     created = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     updated = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
 
+
+    fromuser_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    touser_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    
+    """ fromuser_id = Column(Integer, ForeignKey('users.id'))
+    touser_id = Column(Integer, ForeignKey('users.id')) """
+
+    from_user = db.relationship('User', foreign_keys=[fromuser_id], back_populates='sent_messages')
+    to_user = db.relationship('User', foreign_keys=[touser_id], back_populates='received_messages')
 
     __table_args__ = (
             CheckConstraint(
