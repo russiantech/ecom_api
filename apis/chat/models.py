@@ -1,8 +1,9 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
-
+from sqlalchemy import CheckConstraint
 from apis.ecommerce_api.factory import db, bcrypt
 from apis.roles.models import users_roles
+from apis.shared.custom_mixins import PaginatedAPIMixin
 
 
 class Chat(db.Model, PaginatedAPIMixin):

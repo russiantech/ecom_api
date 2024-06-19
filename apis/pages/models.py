@@ -3,7 +3,21 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from apis.ecommerce_api.factory import db, bcrypt
 from apis.roles.models import users_roles
+from apis.shared.custom_mixins import SearchableMixin
 
+products_pages = \
+    db.Table(
+        "products_pages",
+        db.Column("page_id", db.Integer, db.ForeignKey("pages.id") ),
+        db.Column("product_id", db.Integer, db.ForeignKey("products.id") )
+        )
+
+users_pages = \
+    db.Table(
+        "users_pages",
+        db.Column("user_id", db.Integer, db.ForeignKey("user.id") ),
+        db.Column("page_id", db.Integer, db.ForeignKey("pages.id") )
+        )
 
 class Pages(db.Model, SearchableMixin):
     __tablename__ = 'pages'
@@ -19,8 +33,10 @@ class Pages(db.Model, SearchableMixin):
     password = db.Column(db.String(500), index=True, nullable=False)
     reviews = db.Column(db.Integer)
     
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
-    products = db.relationship('Products',  secondary=products_pages, lazy='dynamic', back_populates='pages', lazy='dynamic')
+
+    # user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    users = db.relationship('User',  secondary=users_pages, lazy='dynamic', back_populates='pages')
+    products = db.relationship('Products',  secondary=products_pages, lazy='dynamic', back_populates='pages')
 
     deleted_at = db.Column(db.Boolean(), default= 0)
     created_at = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)

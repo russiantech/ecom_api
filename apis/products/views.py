@@ -13,7 +13,6 @@ from apis.products.models import Product
 from apis.products.serializers import ProductListSerializer, ProductDetailsSerializer
 from routes import api_bp
 from apis.shared.database import get_or_create
-from apis.shared.security import validate_file_upload
 from apis.shared.serializers import get_error_response, get_success_response
 from apis.tags.models import Tag
 
@@ -80,6 +79,7 @@ def create():
                       tags=tags, categories=categories)
 
     if 'images[]' in request.files:
+        from apis.shared.security import validate_file_upload
         for image in request.files.getlist('images[]'):
             if image and validate_file_upload(image.filename):
                 filename = secure_filename(image.filename)

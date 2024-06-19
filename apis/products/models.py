@@ -5,12 +5,15 @@ from sqlalchemy import event
 from sqlalchemy.orm import relationship, backref
 
 from apis.ecommerce_api.factory import db
-from apis.categories.models import products_categories
+
 from apis.tags.models import products_tags
+# from apis.users.models import products_users
+from apis.categories.models import products_categories
+from apis.pages.models import products_pages
 
 class Product(db.Model):
     __tablename__ = 'products'
-    __searchable__.BAK = [
+    __searchable__BAK = [
         'name', 'price', 'description', 'currency', 'location', 'contact', 'user_id', 'pay_interval', 'condition',
         'negotiable', 'phone', 'about', 'required_skills', 'meet_up', 'ip', 'availability', 'company', 'sku', 'stock', 'discount', 'color', 'size', 'property_size',
         'model', 'year', 'make', 'job_level', 'min_experience', 'min_qualify', 'pay_range', 'responsibilities', 'job_setup', 'required_skills',
@@ -78,17 +81,17 @@ class Product(db.Model):
     contact = db.Column(db.JSON, nullable=True) # contact:- e.g., (name: name, email: email, phone: phone, etc)
     
     is_active = db.Column(db.Boolean(), default=True) # [sold, active]
-    deleted_at = db.Column(db.Boolean(), default=False)
+    deleted = db.Column(db.Boolean(), default=False)
     created_at = db.Column(db.DateTime(), default=datetime.utcnow, index=True, nullable=False)
     updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
     publish_on = db.Column(db.DateTime, index=True, default=datetime.utcnow)
 
     # Foreign Keys and Relationships
     images = db.relationship('ProductImage', back_populates='product')
-    users = db.relationship('User', secondary=products_users, lazy='dynamic', back_populates='products')
+    users = db.relationship('User', secondary='products_users', lazy='dynamic', back_populates='products')
     pages = db.relationship('Page', secondary=products_pages, lazy='dynamic', back_populates='products')
-    tags = db.relationship('Tag', secondary=products_tags, back_populates='products')
-    categories = db.relationship('Category', secondary=products_categories, lazy='dynamic', back_populates='products')
+    tags = db.relationship('Tag', secondary='products_tags', back_populates='products')
+    categories = db.relationship('Category', secondary='products_categories', lazy='dynamic', back_populates='products')
     comments = db.relationship('Comment', back_populates='product', lazy='dynamic')
 
     def __repr__(self):

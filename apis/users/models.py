@@ -3,7 +3,15 @@ from werkzeug.security import generate_password_hash, check_password_hash
 
 from apis.ecommerce_api.factory import db, bcrypt
 from apis.roles.models import users_roles
-from apis.products.models import products_users
+# from apis.products.models import products_users
+from apis.pages.models import users_pages
+
+products_users = \
+    db.Table(
+        "products_users",
+        db.Column("user_id", db.Integer, db.ForeignKey("user.id") ),
+        db.Column("product_id", db.Integer, db.ForeignKey("products.id") )
+        )
 
 class User(db.Model):
     __tablename__ = 'users'
@@ -26,13 +34,16 @@ class User(db.Model):
     user_roles = db.relationship("UserRole", back_populates='user')
     # roles = db.relationship('Role', secondary=users_roles, backref='users')
 
-    # Chat
-    chats_sent = db.relationship('Chat', foreign_keys='Chat.fromuser_id', backref='sender') # Define the relationship with Chat using 'fromuser_id'
-    chats_received = db.relationship('Chat', foreign_keys='Chat.touser_id', backref='receiver') # Define the relationship with Chat using 'touser_id'
-    
-    pages = db.relationship('Pages', back_populates='user') #instead of vendors we have pages(sales page(s))
+    # Relationships with explicit primaryjoin conditions
+    sent_messages = db.relationship('Chat', foreign_keys='Chat.fromuser_id', primaryjoin='Chat.fromuser_id == User.id', 
+                                    backref='from_user', lazy='dynamic')
+    received_messages = db.relationship('Chat', foreign_keys='Chat.touser_id', primaryjoin='Chat.touser_id == User.id', 
+                                        backref='to_user', lazy='dynamic')
+
+    # pages = db.relationship('Pages', back_populates='user') #instead of vendors we have pages(sales page(s))
     basket_items = db.relationship('Basket_Item', back_populates='user')
     
+    pages = db.relationship('Pages', secondary=users_pages, lazy='dynamic', back_populates='users')
     products = db.relationship('Product', secondary=products_users, lazy='dynamic', back_populates='users')
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)

@@ -9,6 +9,7 @@ from routes import api_bp
 from apis.errors.handlers import errors_bp
 from apis.tags.models import Tag
 from apis.users.models import User
+from apis.chat.models import Chat
 
 from views.products import static_bp
 
@@ -16,7 +17,7 @@ from views.products import static_bp
 # is simple and readable anyways.
 
 app.register_blueprint(api_bp, url_prefix='/api') #api-backend
-app.register_blueprint(static_bp)  #api-frontend-static-bp
+app.register_blueprint(static_bp)  #api-frontend
 # app.register_blueprint(errors_bp, url_prefix='/api/errors') //kukuma use/re-use a single bp
 # app.config.setdefault("WTF_CSRF_CHECK_DEFAULT", False)
 
@@ -26,7 +27,7 @@ def make_shell_context():
     return dict(
         app=app, db=db, User=User, address=Address, order=Order, product=Product,
         tag=Tag, category=Category, comment=Comment, file_upload=FileUpload, tag_image=TagImage,
-        category_image=CategoryImage, product_image=ProductImage
+        category_image=CategoryImage, product_image=ProductImage, chat=Chat,
         )
 
 

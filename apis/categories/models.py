@@ -3,7 +3,14 @@ from slugify import slugify
 from sqlalchemy import event, ForeignKey
 from sqlalchemy.orm import relationship, backref
 from apis.ecommerce_api.factory import db
-from apis.products.models import products_categories
+# from apis.products.models import products_categories
+
+products_categories = \
+    db.Table(
+        "products_categories",
+        db.Column("category_id", db.Integer, db.ForeignKey("categories.id") ),
+        db.Column("product_id", db.Integer, db.ForeignKey("products.id") )
+        )
 
 class Category(db.Model):
     __tablename__ = 'categories'
@@ -36,8 +43,4 @@ class Category(db.Model):
 def receive_set(target, value, oldvalue, initiator):
     target.slug = slugify(value)  # Removed unicode() as it is not necessary in Python 3
 
-products_categories = \
-    db.Table("products_categories",
-             db.Column("category_id", db.Integer, db.ForeignKey("categories.id")),
-             db.Column("product_id", db.Integer, db.ForeignKey("products.id")))
 

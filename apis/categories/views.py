@@ -11,7 +11,6 @@ from apis.ecommerce_api.factory import db, app
 from apis.file_uploads.models import CategoryImage
 from routes import api_bp
 from apis.shared.serializers import get_success_response, get_error_response
-from apis.shared.security import validate_file_upload
 
 
 @api_bp.route('/categories', methods=['GET'])
@@ -25,6 +24,9 @@ def list_categories():
 @api_bp.route('/categories', methods=['POST'])
 @jwt_required()
 def create_category():
+    
+    from apis.shared.security import validate_file_upload
+
     if current_user.is_not_admin():
         return jsonify(get_error_response('Permission denied, you must be admin', status_code=401))
 
