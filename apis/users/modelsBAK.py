@@ -1,12 +1,14 @@
 from datetime import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+
+import sqlalchemy as sa
 import sqlalchemy.orm as so
 
 from apis.ecommerce_api.factory import db, bcrypt
 from apis.roles.models import users_roles
 # from apis.products.models import products_users
 from apis.pages.models import users_pages
-from apis.chat.models import user_group
+from apis.chat.models import Chat
 
 products_users = \
     db.Table(
@@ -36,17 +38,35 @@ class User(db.Model):
     user_roles = db.relationship("UserRole", back_populates='user')
     # roles = db.relationship('Role', secondary=users_roles, backref='users')
 
-    # sent_messages = db.relationship('Chat', back_populates='from_user', lazy='dynamic')
-    # received_messages = db.relationship('Chat', back_populates='to_user', lazy='dynamic')
+    # Relationships with explicit primaryjoin conditions
+    """ sent_messages = db.relationship('Chat', foreign_keys='Chat.fromuser_id', primaryjoin='Chat.fromuser_id == User.id', 
+                                    backref='from_user', lazy='dynamic')
+    received_messages = db.relationship('Chat', foreign_keys='Chat.touser_id', primaryjoin='Chat.touser_id == User.id', 
+                                        backref='to_user', lazy='dynamic') """
 
-    # sent_messages = db.relationship('Chat', foreign_keys=Chat.fromuser_id, backref='User.from_user', lazy='dynamic')
-    # received_messages = db.relationship('Chat', foreign_keys=Chat.touser_id, backref='User.to_user', lazy='dynamic')
-    chat = db.relationship('Chat', back_populates='user')
-    groups = db.relationship('Group', secondary=user_group, back_populates='members')
+    """ sent_messages: so.WriteOnlyMapped['Chat'] = so.relationship( foreign_keys='Chat.fromuser_id', back_populates='from_user')
+    received_messages: so.WriteOnlyMapped['Chat'] = so.relationship(foreign_keys='Chat.touser_id', back_populates='to_user') """
+
+    # sent_messages = db.relationship('Chat', foreign_keys=Chat.fromuser_id, back_populates='from_user', lazy='dynamic')
+    # received_messages = db.relationship('Chat', foreign_keys=Chat.touser_id, back_populates='to_user', lazy='dynamic')
+    # sent_messages = db.relationship('Chat', foreign_keys='Chat.fromuser_id', back_populates='from_user', lazy='dynamic')
+    # received_messages = db.relationship('Chat', foreign_keys='Chat.touser_id', back_populates='to_user', lazy='dynamic')
+
+     # Define the relationship with Chat using 'fromuser_id'
+    # sent_messages = db.relationship('Chat', foreign_keys=Chat.fromuser_id, backref='from_user')
+    # received_messages = db.relationship('Chat', foreign_keys=Chat.touser_id, backref='to_user')
+    
+    #sent_messages = db.relationship('Chat', foreign_keys='Chat.fromuser_id', backref='from_user')
+    #received_messages = db.relationship('Chat', foreign_keys='Chat.touser_id', backref='to_user')
+
+    messages_sent: so.WriteOnlyMapped['Chat'] = so.relationship(
+        foreign_keys='Chat.sender_id', back_populates='author')
+    messages_received: so.WriteOnlyMapped['Chat'] = so.relationship(
+        foreign_keys='Chat.recipient_id', back_populates='recipient')
+
     baskets = db.relationship('Basket', back_populates='user')
     pages = db.relationship('Page', secondary=users_pages, lazy='dynamic', back_populates='users')
     products = db.relationship('Product', secondary=products_users, lazy='dynamic', back_populates='users')
-    
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
 

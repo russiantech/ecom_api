@@ -1,13 +1,10 @@
 from datetime import datetime
-from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm import relationship
 from sqlalchemy import CheckConstraint
-from apis.ecommerce_api.factory import db, bcrypt
-from apis.roles.models import users_roles
-from apis.shared.custom_mixins import PaginatedAPIMixin
+from apis.ecommerce_api.factory import db
 
-
-class Chat(db.Model, PaginatedAPIMixin):
-    __tablename__ = 'chat'
+class Chat(db.Model):
+    __tablename__ = 'chats'
 
     id = db.Column(db.Integer, unique=True, primary_key=True, nullable=False)
 
@@ -15,7 +12,6 @@ class Chat(db.Model, PaginatedAPIMixin):
     media = db.Column(db.String(140))
     sticker = db.Column(db.String(140))
 
-    seen = db.Column(db.Boolean(), default=False, nullable=False)
     last_seen = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
 
     fro_del = db.Column(db.Boolean(), default=False, nullable=False)
@@ -25,23 +21,18 @@ class Chat(db.Model, PaginatedAPIMixin):
     created = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
     updated = db.Column(db.DateTime(timezone=True), default=datetime.utcnow)
 
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    user = relationship('User', back_populates='chat')
 
-    fromuser_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    touser_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    
-    """ fromuser_id = Column(Integer, ForeignKey('users.id'))
-    touser_id = Column(Integer, ForeignKey('users.id')) """
-
-    from_user = db.relationship('User', foreign_keys=[fromuser_id], back_populates='sent_messages')
-    to_user = db.relationship('User', foreign_keys=[touser_id], back_populates='received_messages')
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
     __table_args__ = (
-            CheckConstraint(
-                "text IS NOT NULL OR sticker IS NOT NULL OR media IS NOT NULL",
-                name="at_least_one_content_check",
-            ),
-        )
-
+        CheckConstraint(
+            "text IS NOT NULL OR sticker IS NOT NULL OR media IS NOT NULL",
+            name="at_least_one_content_check",
+        ),
+    )
 
     def to_dict(self):
         data = {
@@ -70,4 +61,46 @@ class Chat(db.Model, PaginatedAPIMixin):
     def __repr__(self):
         return '<Chat {}>'.format(self.text)
     # Remember to define the relationship between the `Chat` and `User` models.
+
+
+    def get_summary(self, include_user=False):
+        data = {
+            'id': self.id,
+            'text': self.text if self.text else '',
+            'sticker': self.sticker,
+            'media': self.media,
+            'seen': self.seen,
+            'recent': self.recent,
+            'last_message': self.text if self.text and self.recent else None,
+            'fro_del': self.fro_del,
+            'to_del': self.to_del,
+            'created': self.created.isoformat() + 'Z' if self.created is not None else None,
+            'updated': self.updated.isoformat() + 'Z' if self.updated is not None else None,
+        }
+
+        if include_user:
+            data['user'] = {'id': self.user_id, 'username': self.user.username}
+
+        return data
+
+# UserGroup model (for many-to-many relationship between User and Group)
+user_group = db.Table('user_group',
+    db.Column('user_id', db.Integer, db.ForeignKey('users.id'), primary_key=True),
+    db.Column('group_id', db.Integer, db.ForeignKey('group.id'), primary_key=True)
+)
+
+# MessageRecipient model (for individual and group messages)
+class ChatRecipient(db.Model):
+    __tablename__ = 'chatrecipients'
+    id = db.Column(db.Integer, primary_key=True)
+    chat_id = db.Column(db.Integer, db.ForeignKey('chats.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    # Add other fields as needed (e.g., is_read)
+
+# Group model
+class Group(db.Model):
+    __tablename__ = 'groups'
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(50), unique=True, nullable=False)
+    members = relationship('User', secondary='user_group', back_populates='group')
 
