@@ -11,7 +11,7 @@ from apis.chat.models import user_group
 products_users = \
     db.Table(
         "products_users",
-        db.Column("user_id", db.Integer, db.ForeignKey("user.id") ),
+        db.Column("user_id", db.Integer, db.ForeignKey("users.id") ),
         db.Column("product_id", db.Integer, db.ForeignKey("products.id") )
         )
 

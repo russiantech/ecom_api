@@ -23,10 +23,7 @@ def partially_protected():
 @app.route('/', methods=['GET'])
 def listing():
     try:
-        # print(":::: SO SO TRUEE:::")
-        # return "Welcomr here"
-        return render_template('index.html')
-        # return stream_template('index.html')
+        return stream_template('index.html')
         # return stream_template('index.html'), 201
 
     except Exception as e:

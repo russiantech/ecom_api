@@ -50,13 +50,13 @@ def create_user():
         db.session.add(user)
         db.session.commit()
 
-        return jsonify({'message': 'User registered successfully'}), 201
+        return jsonify({'success':True, 'message': 'User registered successfully'}), 201
         # return user.to_dict(), 201, {'Location': url_for('api.get_user', id=user.id)}
 
     except Exception as e:
         print(traceback.print_exc())
         db.session.rollback()  # Rollback the transaction to maintain data integrity
-        return jsonify({'error': f'User registration failed. {e}'}), 400
+        return jsonify({'success':False, 'error': f'User registration failed. {e}'}), 400
         
 @api_bp.route('/users/<int:id>', methods=['PUT'])
 def update_user(id):
@@ -88,8 +88,6 @@ def update_user(id):
 
 
 # go to> https://blog.miguelgrinberg.com/post/the-flask-mega-tutorial-part-xxiii-application-programming-interfaces-apis
-
-
 
 @api_bp.route('/users_0', methods=['POST'])
 def create_user_0():
@@ -147,13 +145,14 @@ def signin():
     user = User.query.filter_by(username=username).first()
 
     if user is None or not user.is_password_valid(str(password)):
-        return jsonify({"msg": ""}), 401
+        return jsonify({"success":False, "msg": "Invalid credentials"}), 401
 
     # Identity can be any data that is json serializable
     access_token = create_access_token(identity=user)
 
     return jsonify({
         'success': True,
+        "msg": "Signin successful",
         'user': {
             'username': user.username, 'id': user.id,
             'roles': [role.name for role in user.roles],

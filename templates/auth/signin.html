@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-{% block title %} Sign Into Affordable {% endblock title %}
+{% block title %} signin . salesnet {% endblock title %}
 {% block content %}
 
 <div class="content-wrapper">
@@ -40,7 +40,7 @@
 												{{ form.password(class="form-control pe-7", placeholder="password" )}}
 												{% if form.password.errors %}
 												{% for error in form.password.errors %}<div class="link">{{ error }} !
-												</div> 
+												</div>
 												{% endfor %}
 												{% endif %}
 											</div>
@@ -75,5 +75,53 @@
 		</div>
 	</section>
 </div>
-{% include 'incs/newsleta.html' %}
+
 {% endblock content %}
+
+{% block page_js %}
+<script>
+	async function createUser() {
+		const url = 'http://example.com/api/users'; // Replace with your actual API endpoint
+
+		const userData = {
+			username: 'johndoe',
+			email: 'johndoe@example.com',
+			phone: '1234567890',
+			password: 'securepassword'
+		};
+
+		try {
+			const response = await fetch(url, {
+				method: 'POST',
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				body: JSON.stringify(userData),
+			});
+
+			const responseData = await response.json();
+
+			if (response.ok) {
+				console.log('User created successfully:', responseData);
+				// Handle success scenario here
+			} else {
+				console.error('Failed to create user:', responseData.message);
+				// Handle error scenario here
+			}
+		} catch (error) {
+			console.error('Error creating user:', error);
+			// Handle network errors or other exceptions here
+		}
+	}
+
+
+	// Function to handle form submission
+	document.getElementById("signInForm").addEventListener("submit", function (event) {
+		event.preventDefault(); // Prevent default form submission
+		// Call the async function to create a user
+		createUser();
+
+	});
+
+</script>
+{% endblock page_js %}
