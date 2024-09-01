@@ -3,26 +3,6 @@ This is one of my E-commerce API app implementations. It is written in Python wi
 This is not a finished project by any means, but it has a valid enough shape to be git cloned and studied if you are interested in this topic.
 If you are interested in this project take a look at my other server API implementations I have made with:
 
-- [Node Js + Sequelize](https://github.com/melardev/ApiEcomSequelizeExpress)
-- [Node Js + Bookshelf](https://github.com/melardev/ApiEcomBookshelfExpress)
-- [Node Js + Mongoose](https://github.com/melardev/ApiEcomMongooseExpress)
-- [Python Django](https://github.com/melardev/DjangoRestShopApy)
-- [Java EE Spring Boot and Hibernate](https://github.com/melardev/SBootApiEcomMVCHibernate)
-- [Ruby on Rails](https://github.com/melardev/RailsApiEcommerce)
-- [AspNet Core](https://github.com/melardev/ApiAspCoreEcommerce)
-- [Laravel](https://github.com/melardev/ApiEcommerceLaravel)
-
-The next projects to come will be:
-- Elixir with phoenix and Ecto
-- AspNet MVC 6
-- Java EE with Jax RS with jersey
-- Java EE with Apache Struts 2
-- Spring Boot with Kotlin
-- Go with Gorilla and Gorm
-- Go with Beego
-- Laravel with Fractal and Api Resources
-- Flask with other Rest Api frameworks such as apisec, flask restful
-
 ## WARNING
 If you debug the seed_database.py file then be warned you may run into exceptions related to thread safety, in that
 case just rerun the script and try to not place the breakpoint where creating the model takes place
