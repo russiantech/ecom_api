@@ -12,7 +12,7 @@ load_dotenv()
 class Config(object):
     DEBUG = True
 
-    SQLALCHEMY_DATABASE_URI = os.getenv('db_url')
+    SQLALCHEMY_DATABASE_URI = os.getenv('SQLALCHEMY_DATABASE_URI')
     if not SQLALCHEMY_DATABASE_URI:
         raise ValueError("No SQLALCHEMY_DATABASE_URI set for SQLAlchemy")
     

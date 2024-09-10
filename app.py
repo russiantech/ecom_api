@@ -1,5 +1,6 @@
 from apis.addresses.models import Address
 from apis.categories.models import Category
+from apis.chat.models import Chat
 from apis.comments.models import Comment
 from apis.ecommerce_api.factory import app, db
 from apis.file_uploads.models import FileUpload, ProductImage, TagImage, CategoryImage
